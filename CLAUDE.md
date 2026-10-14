@@ -35,7 +35,7 @@ docs/                     reference-avdnettest.md, field-tests.md
 
 - Verdict wording matches the original avdnettest.exe so Windows and Mac outputs can be compared side by side. The exact sentences are recorded in `docs/reference-avdnettest.md`.
 - Exit codes: `0` direct UDP path (STUN) likely, `1` relay only (TURN), `2` UDP blocked (TCP only), `3` tool error.
-- TURN is checked for reachability: an Allocate without credentials answered by a well formed error response counts as reachable. Microsoft's servers answer `300 Try Alternate` with REALM, NONCE and ALTERNATE-SERVER; `401 Unauthorized` with REALM and NONCE is accepted too. The ALTERNATE-SERVER is the second STUN server, as in the original.
+- TURN is checked for reachability, like the original: any well formed STUN response with the matching transaction ID to an unauthenticated Allocate counts as reachable. Microsoft's servers answer `300 Try Alternate` with REALM, NONCE and ALTERNATE-SERVER. The error code we got is shown in `--verbose` and JSON. Every ALTERNATE-SERVER is added as a further STUN server, as in the original.
 - Unlike the original (exit 1 when UDP is blocked), our exit codes follow the contract above. The README must say so.
 - NAT filtering behaviour (RFC 5780) is not promised.
 
