@@ -1,0 +1,4 @@
+.project-map/
+/dist/
+/avd-shortpath-test
+*.pcapng
