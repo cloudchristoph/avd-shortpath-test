@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/netip"
 	"os"
+	"strings"
 )
 
 const appPath = "/Applications/Windows App.app"
@@ -67,10 +68,10 @@ func collect(ctx context.Context, targets []netip.Addr) Report {
 	if _, err := os.Stat(appPath); err == nil {
 		app := &App{Path: appPath}
 		if v, err := command(ctx, "/usr/bin/defaults", "read", appPath+"/Contents/Info", "CFBundleShortVersionString"); err == nil {
-			app.Version = trim(v)
+			app.Version = strings.TrimSpace(v)
 		}
 		if b, err := command(ctx, "/usr/bin/defaults", "read", appPath+"/Contents/Info", "CFBundleVersion"); err == nil {
-			app.Build = trim(b)
+			app.Build = strings.TrimSpace(b)
 		}
 		r.App = app
 	}

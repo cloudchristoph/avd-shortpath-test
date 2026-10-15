@@ -125,7 +125,7 @@ func run(ctx context.Context, cfg Config, res Result, servers []netip.AddrPort) 
 		res.Err = err.Error()
 		return res
 	}
-	defer c.close()
+	defer func() { _ = c.close() }()
 	res.LocalAddr = c.localAddr()
 
 	var alternates []netip.AddrPort
