@@ -39,3 +39,5 @@ jobs:
       - uses: golangci/golangci-lint-action@v9.3.0
         with:
           version: v2.14.0
+      - name: Vulnerabilities (reachable code only)
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
