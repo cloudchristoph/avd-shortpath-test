@@ -8,6 +8,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/cloudchristoph/avd-shortpath-test/internal/env"
 	"github.com/cloudchristoph/avd-shortpath-test/internal/probe"
 )
 
@@ -32,6 +33,8 @@ type Options struct {
 	Version string
 	Color   bool
 	Verbose bool
+	// Env is printed as the Environment section when set.
+	Env *env.Report
 }
 
 // WriteText prints the result in the style of avdnettest.exe, followed by a
@@ -79,6 +82,9 @@ func WriteText(w io.Writer, r probe.Result, o Options) {
 	p.line(footer)
 
 	writeDetails(p, r, o.Verbose)
+	if o.Env != nil {
+		writeEnvironment(p, o.Env)
+	}
 }
 
 func writeDetails(p *printer, r probe.Result, verbose bool) {

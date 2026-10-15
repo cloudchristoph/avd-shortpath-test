@@ -22,6 +22,24 @@ The output starts with the same check lines and verdict sentences as `avdnettest
 
 TURN is checked the way the original checks it: an unauthenticated Allocate request counts as successful if the relay answers at all (Microsoft's relays answer `300 Try Alternate`). No credentials are used, so the tool cannot test an actual relay allocation.
 
+## Environment checks
+
+After the network checks the tool looks at the things that most often push RDP Shortpath to a relay or to TCP. They only produce hints and never change the exit code. Skip them with `--no-env`.
+
+| Check | macOS | Linux |
+|---|---|---|
+| Route to every TURN relay that was tested, flagged when it goes through a tunnel (missing split tunnel) | `route -n get` | `ip -4 route get` |
+| VPN services and their state | `scutil --nc list` | tunnel interfaces only (`tun*`, `wg*`, `tailscale*`, ...) |
+| Proxy (HTTP, HTTPS, SOCKS, PAC URL, auto discovery). PAC files are shown, not evaluated | `scutil --proxy`, then proxy variables | `http_proxy`, `https_proxy`, `all_proxy`, `no_proxy` |
+| Carrier grade NAT (default gateway or outgoing address in 100.64.0.0/10, tunnels such as Tailscale excluded) | yes | yes |
+| Known agents (Zscaler, GlobalProtect, Cisco Secure Client, Netskope, Tailscale, FortiClient, Cloudflare WARP, WireGuard) | process names | process names |
+| No IPv4 address at all (the relays are IPv4 only) | yes | yes |
+| Windows App version | `/Applications/Windows App.app` | n/a |
+
+The Windows App's own settings, such as "Use UDP where possible", are stored in its protected app container. Reading them would trigger a macOS privacy prompt, so the tool does not read them.
+
+All system commands run with fixed arguments. Nothing is sent anywhere except the STUN and TURN requests to the relays.
+
 ## Exit codes
 
 | Code | Meaning |

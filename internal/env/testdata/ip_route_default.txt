@@ -1,0 +1,1 @@
+default via 100.64.0.1 dev wwan0 proto dhcp src 100.71.12.9 metric 700 

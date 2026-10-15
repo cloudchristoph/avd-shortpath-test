@@ -8,11 +8,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/netip"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/cloudchristoph/avd-shortpath-test/internal/config"
+	"github.com/cloudchristoph/avd-shortpath-test/internal/env"
 	"github.com/cloudchristoph/avd-shortpath-test/internal/probe"
 	"github.com/cloudchristoph/avd-shortpath-test/internal/report"
 )
@@ -36,6 +38,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	timeout := fs.Duration("timeout", defaults.Timeout(), "wait for each response; no retransmissions")
 	turnServer := fs.String("avd-turn-server", defaults.TURNServer, "AVD TURN server DNS name or IPv4 address")
 	serversFile := fs.String("servers", "", "JSON file overriding the embedded server defaults")
+	noEnv := fs.Bool("no-env", false, "skip the environment checks (routes, VPN, proxy)")
 	fs.Usage = func() {
 		fmt.Fprintf(stderr, "Usage: avd-shortpath-test [flags]\n\n%s\n\nFlags:\n", report.Disclaimer)
 		fs.PrintDefaults()
@@ -81,9 +84,14 @@ func run(args []string, stdout, stderr io.Writer) int {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	res := probe.Run(ctx, probe.Config{TURNServer: servers.TURNServer, Port: servers.Port, Timeout: wait})
+	var envReport *env.Report
+	if !*noEnv {
+		e := env.Collect(ctx, targets(res))
+		envReport = &e
+	}
 
 	if *jsonOut {
-		if err := report.WriteJSON(stdout, res, version); err != nil {
+		if err := report.WriteJSON(stdout, res, envReport, version); err != nil {
 			fmt.Fprintf(stderr, "avd-shortpath-test: %v\n", err)
 			return report.ExitError
 		}
@@ -92,9 +100,29 @@ func run(args []string, stdout, stderr io.Writer) int {
 			Version: version,
 			Color:   !*noColor && os.Getenv("NO_COLOR") == "" && isTerminal(stdout),
 			Verbose: *verbose,
+			Env:     envReport,
 		})
 	}
 	return report.ExitCode(res)
+}
+
+// targets are all servers the probe talked to, for the route checks.
+func targets(r probe.Result) []netip.Addr {
+	seen := map[netip.Addr]bool{}
+	var out []netip.Addr
+	add := func(a netip.Addr) {
+		if a.IsValid() && !seen[a] {
+			seen[a] = true
+			out = append(out, a)
+		}
+	}
+	for _, a := range r.DNS.Addrs {
+		add(a)
+	}
+	for _, s := range r.STUN {
+		add(s.Server.Addr())
+	}
+	return out
 }
 
 func isTerminal(w io.Writer) bool {
