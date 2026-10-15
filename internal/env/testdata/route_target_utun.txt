@@ -1,0 +1,7 @@
+   route to: 51.5.68.1
+destination: 51.5.0.0
+       mask: 255.255.0.0
+  interface: utun5
+      flags: <UP,DONE,CLONING,STATIC>
+ recvpipe  sendpipe  ssthresh  rtt,msec    rttvar  hopcount      mtu     expire
+       0         0         0         0         0         0      1400         0 

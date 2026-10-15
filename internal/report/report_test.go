@@ -163,7 +163,7 @@ func TestTextDNSFailed(t *testing.T) {
 func TestJSON(t *testing.T) {
 	r := result(probe.NATSymmetric, true, ok("51.5.68.1:3478", "203.0.113.5:40000"), ok("51.5.68.7:3478", "203.0.113.5:40001"))
 	var b bytes.Buffer
-	if err := WriteJSON(&b, r, "test"); err != nil {
+	if err := WriteJSON(&b, r, nil, "test"); err != nil {
 		t.Fatal(err)
 	}
 	var got map[string]any

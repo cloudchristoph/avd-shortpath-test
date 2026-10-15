@@ -1,0 +1,4 @@
+Available network connection services in the current set (*=enabled):
+* (Connected)      66175C33-E154-4A3C-B943-8D6D626A852F VPN (io.tailscale.ipn.macsys) "Tailscale"                      [VPN:io.tailscale.ipn.macsys]
+* (Disconnected)   0B1A2C3D-1111-2222-3333-444455556666 VPN (com.cisco.secureclient.vpn.extension) "Cisco Secure Client" [VPN:com.cisco.secureclient.vpn.extension]
+  (Disconnected)   AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE IPSec              "Office IPSec"                   [IPSec]

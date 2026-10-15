@@ -1,0 +1,2 @@
+51.5.68.1 dev wg0 table 51820 src 10.66.0.2 uid 1000 
+    cache 
