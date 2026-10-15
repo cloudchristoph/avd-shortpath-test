@@ -1,0 +1,5 @@
+{
+  "turnServer": "world.turn.wvd.microsoft.com",
+  "port": 3478,
+  "timeoutMs": 10000
+}
