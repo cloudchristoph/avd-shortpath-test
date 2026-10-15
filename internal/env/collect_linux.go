@@ -2,6 +2,7 @@ package env
 
 import (
 	"context"
+	"errors"
 	"net/netip"
 	"os"
 )
@@ -22,7 +23,7 @@ func collect(ctx context.Context, targets []netip.Addr) Report {
 		}
 	}
 
-	ip := lookPath("ip", "/usr/sbin/ip", "/sbin/ip", "/usr/bin/ip", "/bin/ip")
+	ip := lookPath("/usr/sbin/ip", "/sbin/ip", "/usr/bin/ip", "/bin/ip")
 	if ip == "" {
 		fail(errNoIP)
 	} else {
@@ -44,10 +45,23 @@ func collect(ctx context.Context, targets []netip.Addr) Report {
 
 	r.Proxy = proxyFromEnv(os.Getenv)
 
-	if ps := lookPath("ps", "/usr/bin/ps", "/bin/ps"); ps != "" {
+	if ps := lookPath("/usr/bin/ps", "/bin/ps"); ps != "" {
 		if out, err := command(ctx, ps, "-eo", "comm"); err == nil {
 			r.Agents = parseProcessList(out)
 		}
 	}
 	return r
+}
+
+var errNoIP = errors.New("the ip command was not found")
+
+// lookPath returns the first existing path. Fixed candidates instead of
+// PATH lookups keep the command set predictable.
+func lookPath(candidates ...string) string {
+	for _, c := range candidates {
+		if fi, err := os.Stat(c); err == nil && !fi.IsDir() {
+			return c
+		}
+	}
+	return ""
 }

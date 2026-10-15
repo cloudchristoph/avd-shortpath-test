@@ -1,0 +1,11 @@
+version: "2"
+
+linters:
+  settings:
+    errcheck:
+      # Writing the report to stdout: a failed write cannot be reported anywhere else.
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - (*text/tabwriter.Writer).Flush
