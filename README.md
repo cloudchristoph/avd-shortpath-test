@@ -11,6 +11,24 @@ Checks from macOS or Linux whether RDP Shortpath for public networks (UDP via ST
 - **macOS** (universal binary, arm64 and amd64): network checks plus client environment checks (VPN, proxy, Windows App settings).
 - **Linux** (amd64, arm64): the same network checks, but no client specific checks. There is no Windows App for Linux. The Linux build is meant for checking the network at a thin client site (IGEL, Dell ThinOS, HP and others) from any Linux device such as a laptop or a Raspberry Pi.
 
+## Install
+
+Homebrew (macOS and Linux):
+
+```
+brew install --cask cloudchristoph/tap/avd-shortpath-test
+```
+
+The binary is not notarized (there is no Apple Developer account behind this project). The cask removes the quarantine attribute after installing, so macOS does not block it.
+
+Direct download from the [releases](https://github.com/cloudchristoph/avd-shortpath-test/releases): the macOS archive contains a universal binary (Apple silicon and Intel). Files downloaded with `curl` run as they are. Files downloaded in a browser get the quarantine attribute; remove it with:
+
+```
+xattr -d com.apple.quarantine ./avd-shortpath-test
+```
+
+Each release has a `checksums.txt` to verify the archives.
+
 ## Usage
 
 ```
