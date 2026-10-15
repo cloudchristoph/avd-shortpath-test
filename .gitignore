@@ -2,3 +2,4 @@
 /dist/
 /avd-shortpath-test
 *.pcapng
+.scratch/
