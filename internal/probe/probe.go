@@ -78,6 +78,7 @@ type STUNResult struct {
 
 // Result is everything a run found.
 type Result struct {
+	Port       uint16           `json:"port"`
 	LocalAddr  netip.AddrPort   `json:"localAddr,omitzero"`
 	DNS        DNSResult        `json:"dns"`
 	TURN       []TURNResult     `json:"turn"`
@@ -103,7 +104,7 @@ func (r Result) UDPBlocked() bool {
 // All requests use one local UDP socket. A DNS failure ends the run with an
 // empty server list; a failed request is recorded and the run goes on.
 func Run(ctx context.Context, cfg Config) Result {
-	var res Result
+	res := Result{Port: cfg.Port}
 	res.DNS = resolve(ctx, cfg)
 	servers := make([]netip.AddrPort, 0, len(res.DNS.Addrs))
 	for _, a := range res.DNS.Addrs {
