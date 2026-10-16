@@ -76,7 +76,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "avd-shortpath-test: --log-file: %v\n", err)
 		return report.ExitError
 	}
-	defer logger.Close()
+	defer func() { _ = logger.Close() }()
 	logger.Normalf("avd-shortpath-test %s, log level %s", version, level)
 
 	servers := defaults
