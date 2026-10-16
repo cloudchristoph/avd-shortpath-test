@@ -14,6 +14,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/cloudchristoph/avd-shortpath-test/internal/logx"
 )
 
 // Report is what Collect found.
@@ -106,8 +108,21 @@ type Finding struct {
 // Collect gathers the environment. targets are the probe servers; the route
 // to each is checked.
 func Collect(ctx context.Context, targets []netip.Addr) Report {
+	log := logx.FromContext(ctx)
+	log.Normalf("environment check start, %d targets", len(targets))
 	r := collect(ctx, targets)
 	r.Findings = Findings(r)
+	log.Debugf("environment: os %s, ipv4 %t, tunnels %d, vpn services %d, proxy configured %t, agents %v", r.OS, r.HasIPv4, len(r.Tunnels), len(r.VPNServices), r.Proxy.Configured(), r.Agents)
+	for _, e := range r.Errors {
+		log.Errorf("environment check error: %s", e)
+	}
+	for _, f := range r.Findings {
+		if f.Severity == Warning {
+			log.Warnf("finding: %s", f.Text)
+		} else {
+			log.Normalf("finding (%s): %s", f.Severity, f.Text)
+		}
+	}
 	return r
 }
 
@@ -115,14 +130,19 @@ const commandTimeout = 3 * time.Second
 
 // command runs a system command with fixed arguments and returns its output.
 func command(ctx context.Context, name string, args ...string) (string, error) {
+	log := logx.FromContext(ctx)
 	ctx, cancel := context.WithTimeout(ctx, commandTimeout)
 	defer cancel()
+	log.Debugf("run command: %s %s", name, strings.Join(args, " "))
+	start := time.Now()
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Env = []string{"LANG=C", "LC_ALL=C", "PATH=/usr/bin:/bin:/usr/sbin:/sbin"}
 	out, err := cmd.Output()
 	if err != nil {
+		log.Warnf("command failed after %s: %s %s: %v", time.Since(start), name, strings.Join(args, " "), err)
 		return "", fmt.Errorf("%s: %w", name, err)
 	}
+	log.Debugf("command ok after %s: %s, %d bytes of output", time.Since(start), name, len(out))
 	return string(out), nil
 }
 

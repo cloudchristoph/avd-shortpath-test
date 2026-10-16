@@ -35,10 +35,13 @@ xattr -d com.apple.quarantine ./avd-shortpath-test
 ## Usage
 
 ```
-avd-shortpath-test [--json] [--verbose] [--no-color] [--no-env] [--timeout 10s]
+avd-shortpath-test [--json] [--verbose] [--color auto|on|off] [--no-env] [--timeout 10s]
                    [--avd-turn-server world.turn.wvd.microsoft.com] [--servers file.json]
-                   [--version]
+                   [--log-level none|critical|error|warning|normal|debug] [--log-file path]
+                   [--pause auto|on|off] [--version]
 ```
+
+`--color`, `--pause`, `--log-level` and `--log-file` match the options of `avdnettest.exe`. `--no-color` is a short form of `--color off`. A log file is only written when `--log-level` is not `none`; the default file is `avd-shortpath-test.log`. `--pause` waits for Enter before exiting and only does so on a terminal. With `auto` it never pauses on macOS and Linux. The log line format is our own, not the original's.
 
 The output starts with the same check lines and verdict sentences as `avdnettest.exe`, so results from Windows and macOS can be compared line by line. A details section follows with response times, mapped addresses and the TURN response.
 

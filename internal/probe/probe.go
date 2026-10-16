@@ -9,6 +9,8 @@ import (
 	"net"
 	"net/netip"
 	"time"
+
+	"github.com/cloudchristoph/avd-shortpath-test/internal/logx"
 )
 
 // Status is the outcome of a single request.
@@ -104,8 +106,15 @@ func (r Result) UDPBlocked() bool {
 // All requests use one local UDP socket. A DNS failure ends the run with an
 // empty server list; a failed request is recorded and the run goes on.
 func Run(ctx context.Context, cfg Config) Result {
+	log := logx.FromContext(ctx)
+	log.Normalf("probe start: server %s port %d timeout %s", cfg.TURNServer, cfg.Port, cfg.Timeout)
 	res := Result{Port: cfg.Port}
 	res.DNS = resolve(ctx, cfg)
+	if res.DNS.Err != "" {
+		log.Errorf("DNS resolution of %s failed: %s", res.DNS.Name, res.DNS.Err)
+	} else {
+		log.Normalf("DNS %s resolved to %v in %s (ip literal: %t)", res.DNS.Name, res.DNS.Addrs, res.DNS.Duration, res.DNS.IPLiteral)
+	}
 	servers := make([]netip.AddrPort, 0, len(res.DNS.Addrs))
 	for _, a := range res.DNS.Addrs {
 		servers = append(servers, netip.AddrPortFrom(a, cfg.Port))
@@ -115,18 +124,23 @@ func Run(ctx context.Context, cfg Config) Result {
 
 // run does steps 2 to 4 against the given servers.
 func run(ctx context.Context, cfg Config, res Result, servers []netip.AddrPort) Result {
+	log := logx.FromContext(ctx)
 	res.NAT = NATNone
 	if len(servers) == 0 {
+		log.Warnf("server list is empty, no checks run")
 		return res
 	}
 
 	c, err := openConn(cfg.Timeout)
 	if err != nil {
 		res.Err = err.Error()
+		log.Criticalf("failed to open local UDP socket: %v", err)
 		return res
 	}
 	defer func() { _ = c.close() }()
+	c.log = log
 	res.LocalAddr = c.localAddr()
+	log.Debugf("local UDP socket %s", res.LocalAddr)
 
 	var alternates []netip.AddrPort
 	for _, s := range servers {
@@ -143,6 +157,7 @@ func run(ctx context.Context, cfg Config, res Result, servers []netip.AddrPort) 
 		res.TURN = append(res.TURN, t)
 	}
 	servers = append(servers, alternates...)
+	log.Debugf("STUN server list (resolved plus alternates): %v", servers)
 
 	for _, s := range servers {
 		if ctx.Err() != nil {
@@ -155,6 +170,8 @@ func run(ctx context.Context, cfg Config, res Result, servers []netip.AddrPort) 
 		res.STUN = append(res.STUN, b)
 	}
 	res.NAT = EvaluateNAT(res.Mapped)
+	log.Normalf("final list of addresses: %v", res.Mapped)
+	log.Normalf("NAT decision: %s (%d mapped addresses), TURN access: %t", res.NAT, len(res.Mapped), res.TURNAccess)
 	return res
 }
 
@@ -192,31 +209,42 @@ func resolve(ctx context.Context, cfg Config) DNSResult {
 func allocate(c *conn, server netip.AddrPort) TURNResult {
 	req := newAllocate()
 	r := TURNResult{Server: server, TransactionID: txID(req.TransactionID)}
+	c.log.Normalf("Allocate request to %s tx %s", server, r.TransactionID)
 	resp, rtt, err := c.roundTrip(req, server)
 	r.Status, r.RTT = statusOf(err), rtt
 	if err != nil {
 		r.Err = err.Error()
+		c.log.Warnf("Allocate response from %s tx %s: %s after %s", server, r.TransactionID, r.Status, rtt)
 		return r
 	}
 	parseAllocateResponse(resp, &r)
+	alt := "none"
+	if r.Alternate != nil {
+		alt = r.Alternate.String()
+	}
+	c.log.Normalf("Allocate response from %s tx %s: class %s error code %d rtt %s alternate %s", server, r.TransactionID, r.Class, r.ErrorCode, rtt, alt)
 	return r
 }
 
 func binding(c *conn, server netip.AddrPort) STUNResult {
 	req := newBinding()
 	r := STUNResult{Server: server, TransactionID: txID(req.TransactionID)}
+	c.log.Normalf("Binding request to %s tx %s", server, r.TransactionID)
 	resp, rtt, err := c.roundTrip(req, server)
 	r.Status, r.RTT = statusOf(err), rtt
 	if err != nil {
 		r.Err = err.Error()
+		c.log.Warnf("Binding response from %s tx %s: %s after %s", server, r.TransactionID, r.Status, rtt)
 		return r
 	}
 	mapped, ok := mappedAddress(resp)
 	if !ok {
 		r.Status, r.Err = StatusInvalid, "no mapped address in response"
+		c.log.Errorf("Binding response from %s tx %s has no mapped address", server, r.TransactionID)
 		return r
 	}
 	r.Mapped = mapped
+	c.log.Normalf("Binding response from %s tx %s: mapped %s rtt %s", server, r.TransactionID, mapped, rtt)
 	return r
 }
 
