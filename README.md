@@ -63,6 +63,8 @@ After the network checks the tool looks at the things that most often push RDP S
 
 The Windows App's own settings are stored in its protected app container. macOS blocks other programs from reading it unless they have Full Disk Access, so the tool does not read it. Check the "Use UDP where possible" option in the Windows App settings yourself. The tool only reports the installed version.
 
+The agent names come from vendor documentation where it exists. Some names are from third party sources or not verified yet, see [docs/agent-detection-sources.md](docs/agent-detection-sources.md). A running agent is only a hint, not proof that it captures UDP 3478.
+
 All system commands run with fixed arguments. Nothing is sent anywhere except the STUN and TURN requests to the relays.
 
 ## Exit codes
