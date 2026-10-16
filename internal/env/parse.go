@@ -187,10 +187,10 @@ var knownAgents = []struct {
 	{"Zscaler", []string{"zscaler"}},
 	{"GlobalProtect", []string{"pangps", "pangpa", "globalprotect"}},
 	{"Cisco Secure Client", []string{"vpnagentd", "cisco secure client", "acwebsecagent"}},
-	{"Netskope", []string{"netskope", "nsauxiliarysvc", "stagentd"}},
+	{"Netskope", []string{"netskope", "nsauxiliarysvc", "stagentsvc", "stagentui", "stagentapp"}},
 	{"Tailscale", []string{"tailscale"}},
-	{"FortiClient", []string{"forticlient", "fortitray"}},
-	{"Cloudflare WARP", []string{"cloudflare warp", "warp-svc"}},
+	{"FortiClient", []string{"forticlient", "fortitray", "fctservctl", "fctctld", "sslvpnd"}},
+	{"Cloudflare WARP", []string{"cloudflare warp", "cloudflarewarp", "warp-svc"}},
 	{"WireGuard", []string{"wireguard"}},
 }
 

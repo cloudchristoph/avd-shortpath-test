@@ -29,6 +29,42 @@ Windows names (`ZSATray.exe`, `ZSATunnel.exe`, `ZSAService.exe`) are documented 
 | `globalprotect` (app binary) | macOS | documented | same page |
 | `pangps`, `pangpa` | Linux | unverified | The Linux agent is expected to use the same names. No source checked. |
 
-## Not yet checked
+## Netskope Client
 
-Cisco Secure Client (`vpnagentd`, `cisco secure client`, `acwebsecagent`), Netskope (`netskope`, `nsauxiliarysvc`, `stagentd`), FortiClient (`forticlient`, `fortitray`), Cloudflare WARP (`cloudflare warp`, `warp-svc`) and WireGuard (`wireguard`) are unverified. They need a source before the README states that they are detected.
+| Match | Platform | Status | Source |
+|---|---|---|---|
+| `stagentsvc`, `stagentui`, `stagentapp` | Linux | documented | [Exceptions for Anti Virus Applications](https://docs.netskope.com/en/exceptions-for-anti-virus-applications/) lists `stAgentSvc`, `stAgentUI`, `stAgentApp`, `stAgentCli` under `/opt/netskope/stagent/` |
+| `nsauxiliarysvc` | macOS | documented | same page, XPC service in `Netskope Client.app` |
+| `netskope` | macOS | documented | same page, the app is `Netskope Client.app` |
+
+`stagentd` was in the earlier list. No source names it, so it was removed.
+
+## FortiClient
+
+| Match | Platform | Status | Source |
+|---|---|---|---|
+| `fctservctl` (also matches `fctservctl2`), `fctctld`, `sslvpnd` | macOS | documented | [FortiClient (macOS) processes](https://docs.fortinet.com/document/forticlient/6.2.0/administration-guide/234949) |
+| `forticlient` | macOS | documented | same page, app and agent paths contain `FortiClient` |
+| `fortitray` | any | unverified | Not found for macOS or Linux. The macOS tray controller is `FortiClientAgent` (newer builds `FortiGuardAgent`), which `forticlient` does not cover for `FortiGuardAgent`. |
+| any | Linux | unverified | No Linux process list found. |
+
+## Cloudflare WARP
+
+| Match | Platform | Status | Source |
+|---|---|---|---|
+| `warp-svc` | Linux | documented | [Cloudflare One Client](https://developers.cloudflare.com/cloudflare-one/team-and-resources/devices/warp/) lists `/bin/warp-svc` and `/bin/warp-taskbar` |
+| `cloudflarewarp` | macOS | documented | same docs: daemon `Cloudflare WARP.app/Contents/Resources/CloudflareWARP` |
+| `cloudflare warp` | macOS | documented | same docs: GUI `Cloudflare WARP.app/Contents/MacOS/Cloudflare WARP` |
+
+## Cisco Secure Client
+
+| Match | Platform | Status | Source |
+|---|---|---|---|
+| `vpnagentd`, `cisco secure client`, `acwebsecagent` | macOS, Linux | unverified | Search found `vpnagentd` only on third party pages. Version 5.1 renamed launch labels (for example `com.cisco.secureclient.vpnagentd` to `com.cisco.secureclient.vpn.service.agent`), so process names may differ by version. Check with `ps` on an installed host. |
+
+## WireGuard
+
+| Match | Platform | Status | Source |
+|---|---|---|---|
+| `wireguard` | macOS | indirect | The [wireguard-apple](https://git.zx2c4.com/wireguard-apple/) source has a `WireGuardNetworkExtension` folder. The running process name was not confirmed. |
+| `wireguard` | Linux | n/a | The kernel module has no process. `wg-quick` interfaces are found by the tunnel check, not by this list. |
