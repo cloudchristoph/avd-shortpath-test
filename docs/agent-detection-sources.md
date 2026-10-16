@@ -16,7 +16,7 @@ Status: **documented** means a vendor page or a quote of the vendor's list names
 
 | Match | Platform | Status | Source |
 |---|---|---|---|
-| `zscaler` (`ZscalerService`, `ZscalerTunnel`, `ZscalerUpdater`) | macOS | secondary, quotes the vendor's allowlist | [Jamf community thread](https://community.jamf.com/general-discussions-2/jamfg-firewall-management-to-allow-zscaler-processes-34380). The vendor page [Zscaler Client Connector processes allowlist](https://help.zscaler.com/unified/zscaler-client-connector-processes-allowlist) is the primary source, but it could not be read automatically. Check it by hand. |
+| `zscaler` (`Zscaler`, `ZscalerService`, `ZscalerTunnel`, `ZscalerUpdater`) | macOS | secondary, the poster cites Zscaler's allowlist | [Jamf community thread](https://community.jamf.com/general-discussions-2/jamfg-firewall-management-to-allow-zscaler-processes-34380) from 2024-09-25. It also lists `UPMServiceController` and `zdpd`, which are not matched. The vendor page [Zscaler Client Connector processes allowlist](https://help.zscaler.com/unified/zscaler-client-connector-processes-allowlist) did not load, neither for the tool nor in a browser. |
 | `zscaler` | Linux | unverified | No source found for Linux process names. Zscaler's own pages only describe the package (`zscaler-client_*.deb`, `/opt/zscaler`). Check `ps` on an installed host. |
 
 Windows names (`ZSATray.exe`, `ZSATunnel.exe`, `ZSAService.exe`) are documented but not matched, because the tool does not run on Windows.
