@@ -62,7 +62,8 @@ homebrew_casks:
       post:
         # The binary is not notarized (no Apple Developer account). Homebrew
         # sets the quarantine attribute on casks, so remove it after install.
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/avd-shortpath-test"]
+        # Needs GoReleaser v2.19 or newer (install_steps).
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/avd-shortpath-test"]
           end
