@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/netip"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func collect(ctx context.Context, targets []netip.Addr) Report {
@@ -64,4 +66,33 @@ func lookPath(candidates ...string) string {
 		}
 	}
 	return ""
+}
+
+// sysfsNet is the directory with one entry per network interface.
+var sysfsNet = "/sys/class/net"
+
+// tunnelByKind recognizes tunnels whatever their name is: WireGuard (and a
+// few other virtual tunnel types) report a DEVTYPE, tun and tap devices have
+// a tun_flags file.
+func tunnelByKind(name string) bool {
+	if name == "" || strings.ContainsAny(name, "/\x00") {
+		return false
+	}
+	dir := filepath.Join(sysfsNet, name)
+	if _, err := os.Stat(filepath.Join(dir, "tun_flags")); err == nil {
+		return true
+	}
+	b, err := os.ReadFile(filepath.Join(dir, "uevent"))
+	if err != nil {
+		return false
+	}
+	for _, line := range strings.Split(string(b), "\n") {
+		if t, ok := strings.CutPrefix(line, "DEVTYPE="); ok {
+			switch strings.TrimSpace(t) {
+			case "wireguard", "ppp", "vti", "gre", "ipip", "sit":
+				return true
+			}
+		}
+	}
+	return false
 }

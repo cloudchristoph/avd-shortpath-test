@@ -183,14 +183,15 @@ func interfaces() ([]Interface, error) {
 
 var tunnelPrefixes = []string{"utun", "ipsec", "ppp", "tun", "tap", "wg", "tailscale", "zt", "gpd", "vti", "nordlynx", "cscotun"}
 
-// isTunnel reports whether an interface name belongs to a VPN tunnel.
+// isTunnel reports whether an interface is a VPN tunnel: by name, or by the
+// kind the system reports (Linux), since tools like wg-quick accept any name.
 func isTunnel(name string) bool {
 	for _, p := range tunnelPrefixes {
 		if strings.HasPrefix(name, p) {
 			return true
 		}
 	}
-	return false
+	return tunnelByKind(name)
 }
 
 var cgnat = netip.MustParsePrefix("100.64.0.0/10")
