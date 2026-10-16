@@ -3,3 +3,6 @@
 /avd-shortpath-test
 *.pcapng
 .scratch/
+
+# Private project instructions, not in the repo
+CLAUDE.local.md
