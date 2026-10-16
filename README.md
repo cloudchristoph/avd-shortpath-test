@@ -61,7 +61,7 @@ After the network checks the tool looks at the things that most often push RDP S
 | No IPv4 address at all (the relays are IPv4 only) | yes | yes |
 | Windows App version, with a hint when it is older than 11.3.8 (the first version Microsoft lists for Shortpath on public networks) | `/Applications/Windows App.app` | n/a |
 
-The Windows App's own settings, such as "Use UDP where possible", are stored in its protected app container. Reading them would trigger a macOS privacy prompt, so the tool does not read them.
+The Windows App's own settings are stored in its protected app container. macOS blocks other programs from reading it unless they have Full Disk Access, so the tool does not read it. Check the "Use UDP where possible" option in the Windows App settings yourself. The tool only reports the installed version.
 
 All system commands run with fixed arguments. Nothing is sent anywhere except the STUN and TURN requests to the relays.
 
