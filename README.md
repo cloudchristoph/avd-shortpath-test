@@ -54,7 +54,7 @@ After the network checks the tool looks at the things that most often push RDP S
 | Check | macOS | Linux |
 |---|---|---|
 | Route to every TURN relay that was tested, flagged when it goes through a tunnel (missing split tunnel) | `route -n get` | `ip -4 route get` |
-| VPN services and their state | `scutil --nc list` | tunnel interfaces only (`tun*`, `wg*`, `tailscale*`, ...) |
+| VPN services and their state | `scutil --nc list` | tunnel interfaces only, found by name (`tun*`, `wg*`, `tailscale*`, ...) or by kind (WireGuard and tun devices with any name) |
 | Proxy (HTTP, HTTPS, SOCKS, PAC URL, auto discovery). PAC files are shown, not evaluated | `scutil --proxy`, then proxy variables | `http_proxy`, `https_proxy`, `all_proxy`, `no_proxy` |
 | Carrier grade NAT (default gateway or outgoing address in 100.64.0.0/10, tunnels such as Tailscale excluded) | yes | yes |
 | Known agents (Zscaler, GlobalProtect, Cisco Secure Client, Netskope, Tailscale, FortiClient, Cloudflare WARP, WireGuard) | process names | process names |
