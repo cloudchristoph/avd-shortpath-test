@@ -92,6 +92,28 @@ func TestProxyFromEnv(t *testing.T) {
 	}
 }
 
+func TestParseProcessListDocumentedNames(t *testing.T) {
+	cases := map[string]string{
+		"stAgentSvc":      "Netskope",
+		"nsAuxiliarySvc":  "Netskope",
+		"fctservctl2":     "FortiClient",
+		"fctctld":         "FortiClient",
+		"CloudflareWARP":  "Cloudflare WARP",
+		"warp-svc":        "Cloudflare WARP",
+		"Cloudflare WARP": "Cloudflare WARP",
+		"tailscaled":      "Tailscale",
+		"PanGPA":          "GlobalProtect",
+		"ZscalerService":  "Zscaler",
+		"launchd":         "",
+	}
+	for proc, want := range cases {
+		got := strings.Join(parseProcessList(proc+"\n"), ",")
+		if got != want {
+			t.Errorf("%s: got %q, want %q", proc, got, want)
+		}
+	}
+}
+
 func TestParseProcessList(t *testing.T) {
 	out := "launchd\nTailscale\nio.tailscale.ipn.macsys.network-extension\nZscalerTunnel\nPanGPS\nFinder\n"
 	got := parseProcessList(out)

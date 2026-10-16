@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/pion/stun/v3"
+
+	"github.com/cloudchristoph/avd-shortpath-test/internal/logx"
 )
 
 var (
@@ -20,6 +22,7 @@ var (
 type conn struct {
 	udp     *net.UDPConn
 	timeout time.Duration
+	log     *logx.Logger // nil logs nothing
 }
 
 func openConn(timeout time.Duration) (*conn, error) {
@@ -43,6 +46,7 @@ func (c *conn) close() error { return c.udp.Close() }
 // reported as errInvalid.
 func (c *conn) roundTrip(req *stun.Message, dst netip.AddrPort) (*stun.Message, time.Duration, error) {
 	start := time.Now()
+	c.log.Debugf("sending %d bytes to %s (timeout %s)", len(req.Raw), dst, c.timeout)
 	if _, err := c.udp.WriteToUDPAddrPort(req.Raw, dst); err != nil {
 		return nil, 0, fmt.Errorf("send: %w", err)
 	}
@@ -63,6 +67,7 @@ func (c *conn) roundTrip(req *stun.Message, dst netip.AddrPort) (*stun.Message, 
 			continue
 		}
 		rtt := time.Since(start)
+		c.log.Debugf("received %d bytes from %s after %s", n, from, rtt)
 		if !stun.IsMessage(buf[:n]) {
 			return nil, rtt, errInvalid
 		}

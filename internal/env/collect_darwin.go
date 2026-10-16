@@ -77,3 +77,6 @@ func collect(ctx context.Context, targets []netip.Addr) Report {
 	}
 	return r
 }
+
+// tunnelByKind has nothing to add to the name check here.
+func tunnelByKind(string) bool { return false }
