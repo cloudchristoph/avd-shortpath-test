@@ -178,7 +178,8 @@ func parseProcessList(out string) []string {
 }
 
 // knownAgents are matched case insensitively against process names. Only a
-// hint: a running agent does not mean it captures UDP 3478.
+// hint: a running agent does not mean it captures UDP 3478. Where the names
+// come from is recorded in docs/agent-detection-sources.md.
 var knownAgents = []struct {
 	name      string
 	processes []string
