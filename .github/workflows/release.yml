@@ -26,4 +26,45 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+  homebrew:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Render cask
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          mkdir dist
+          gh release download "$GITHUB_REF_NAME" --dir dist \
+            --pattern "*_${version}_darwin_universal.tar.gz" \
+            --pattern "*_${version}_linux_amd64.tar.gz" \
+            --pattern "*_${version}_linux_arm64.tar.gz"
+          packaging/homebrew/render-cask.sh "$version" \
+            "dist/avd-shortpath-test_${version}_darwin_universal.tar.gz" \
+            "dist/avd-shortpath-test_${version}_linux_amd64.tar.gz" \
+            "dist/avd-shortpath-test_${version}_linux_arm64.tar.gz" \
+            > avd-shortpath-test.rb
+      - uses: actions/checkout@v7.0.1
+        with:
+          repository: cloudchristoph/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+      - name: Push cask
+        run: |
+          mkdir -p tap/Casks
+          cp avd-shortpath-test.rb tap/Casks/avd-shortpath-test.rb
+          cd tap
+          git add Casks/avd-shortpath-test.rb
+          if git diff --cached --quiet; then
+            echo "Cask unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "avd-shortpath-test ${GITHUB_REF_NAME}"
+          git push

@@ -40,30 +40,3 @@ changelog:
 release:
   footer: |
     This is an unofficial tool and is not affiliated with or endorsed by Microsoft.
-
-homebrew_casks:
-  - name: avd-shortpath-test
-    ids: [default]
-    binaries: [avd-shortpath-test]
-    directory: Casks
-    homepage: https://github.com/cloudchristoph/avd-shortpath-test
-    description: "Check RDP Shortpath (STUN, TURN, NAT) for Azure Virtual Desktop and Windows 365. Unofficial."
-    license: MIT
-    commit_author:
-      name: goreleaserbot
-      email: bot@goreleaser.com
-    commit_msg_template: "avd-shortpath-test {{ .Tag }}"
-    repository:
-      owner: cloudchristoph
-      name: homebrew-tap
-      branch: main
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    hooks:
-      post:
-        # The binary is not notarized (no Apple Developer account). Homebrew
-        # sets the quarantine attribute on casks, so remove it after install.
-        # Needs GoReleaser v2.19 or newer (install_steps).
-        install_steps: |
-          on_macos do
-            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/avd-shortpath-test"]
-          end
